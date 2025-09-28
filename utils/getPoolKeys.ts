@@ -4,6 +4,18 @@ import { Commitment, Connection, PublicKey } from "@solana/web3.js";
 import dotenv from 'dotenv'
 dotenv.config();
 
+interface MintInfo {
+    value: {
+        data: {
+            parsed: {
+                info: {
+                    decimals: number
+                }
+            }
+        }
+    }
+}
+
 export class PoolKeys {
     static SOLANA_ADDRESS = 'So11111111111111111111111111111111111111112'
     static RAYDIUM_POOL_V4_PROGRAM_ID = '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8';
@@ -120,18 +132,6 @@ export class PoolKeys {
             marketAsks: marketInfo.asks,
             marketEventQueue: marketInfo.eventQueue,
             lookupTableAccount: PublicKey.default
-        }
-    }
-}
-
-interface MintInfo {
-    value: {
-        data: {
-            parsed: {
-                info: {
-                    decimals: number
-                }
-            }
         }
     }
 }

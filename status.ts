@@ -21,7 +21,8 @@ import {
   RPC_WEBSOCKET_ENDPOINT,
   TOKEN_MINT,
 } from './constants'
-import { deleteConsoleLines, logger, PoolKeys, readJson, sleep } from './utils'
+import { deleteConsoleLines, logger, readJson, sleep } from './utils'
+import { PoolKeys } from './utils/getPoolKeys'
 import base58 from 'bs58'
 
 export const solanaConnection = new Connection(RPC_ENDPOINT, {

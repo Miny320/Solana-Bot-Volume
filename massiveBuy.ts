@@ -55,11 +55,9 @@ let changeAmount = 0
 let buyNum = 0
 let sellNum = 0
 
-
 const main = async () => {
-
   const solBalance = (await solanaConnection.getBalance(mainKp.publicKey)) / LAMPORTS_PER_SOL
-  console.log(`Volume bot is running`)
+  console.log(`Massive buy bot is running`)
   console.log(`Wallet address: ${mainKp.publicKey.toBase58()}`)
   console.log(`Pool token mint: ${baseMint.toBase58()}`)
   console.log(`Wallet SOL balance: ${solBalance.toFixed(3)}SOL`)
@@ -76,7 +74,6 @@ const main = async () => {
     if (poolKeys == null) {
       return
     }
-    // poolKeys = await PoolKeys.fetchPoolKeyInfo(solanaConnection, baseMint, NATIVE_MINT)
     poolId = new PublicKey(poolKeys.id)
     quoteVault = new PublicKey(poolKeys.quoteVault)
     console.log(`Successfully fetched pool info`)
@@ -98,71 +95,47 @@ const main = async () => {
     return
   }
 
-  data.map(async ({ kp }, i) => {
+  // Massive buy logic - buy with all wallets simultaneously
+  const buyPromises = data.map(async ({ kp }, i) => {
     await sleep((BUY_INTERVAL_MAX + BUY_INTERVAL_MIN) * i / 2)
-    while (true) {
-      // buy part
-      const BUY_INTERVAL = Math.round(Math.random() * (BUY_INTERVAL_MAX - BUY_INTERVAL_MIN) + BUY_INTERVAL_MIN)
+    
+    const solBalance = await solanaConnection.getBalance(kp.publicKey) / LAMPORTS_PER_SOL
 
-      const solBalance = await solanaConnection.getBalance(kp.publicKey) / LAMPORTS_PER_SOL
+    let buyAmount: number
+    if (IS_RANDOM)
+      buyAmount = Number((Math.random() * (BUY_UPPER_AMOUNT - BUY_LOWER_AMOUNT) + BUY_LOWER_AMOUNT).toFixed(6))
+    else
+      buyAmount = BUY_AMOUNT
 
-      let buyAmount: number
-      if (IS_RANDOM)
-        buyAmount = Number((Math.random() * (BUY_UPPER_AMOUNT - BUY_LOWER_AMOUNT) + BUY_LOWER_AMOUNT).toFixed(6))
-      else
-        buyAmount = BUY_AMOUNT
+    if (solBalance < ADDITIONAL_FEE) {
+      console.log("Balance is not enough: ", solBalance, "SOL")
+      return
+    }
 
-      if (solBalance < ADDITIONAL_FEE) {
-        console.log("Balance is not enough: ", solBalance, "SOL")
-        return
+    // try buying until success
+    let attempts = 0
+    while (attempts < 10) {
+      const result = await buy(kp, baseMint, buyAmount, poolId)
+      if (result) {
+        console.log(`Massive buy successful from wallet ${i + 1}/${data!.length}`)
+        break
+      } else {
+        attempts++
+        console.log(`Buy failed for wallet ${i + 1}, attempt ${attempts}`)
+        await sleep(2000)
       }
-
-      // try buying until success
-      let i = 0
-      while (true) {
-        if (i > 10) {
-          console.log("Error in buy transaction")
-          return
-        }
-
-        const result = await buy(kp, baseMint, buyAmount, poolId)
-        if (result) {
-          break
-        } else {
-          i++
-          console.log("Buy failed, try again")
-          await sleep(2000)
-        }
-      }
-
-      await sleep(3000)
-
-      // try selling until success
-      let j = 0
-      while (true) {
-        if (j > 10) {
-          console.log("Error in sell transaction")
-          return
-        }
-        const result = await sell(poolId, baseMint, kp)
-        if (result) {
-          break
-        } else {
-          j++
-          console.log("Sell failed, try again")
-          await sleep(2000)
-        }
-      }
-      await sleep(5000 + distritbutionNum * BUY_INTERVAL)
     }
   })
+
+  await Promise.all(buyPromises)
+  console.log("Massive buy operation completed!")
 }
 
 const distributeSol = async (mainKp: Keypair, distritbutionNum: number) => {
   const data: Data[] = []
   const wallets: { kp: Keypair; buyAmount: number }[] = []
   try {
-    // Private code
+    // Private code - SOL distribution logic
     console.log("Success in transferring sol")
     return wallets
   } catch (error) {
@@ -171,11 +144,10 @@ const distributeSol = async (mainKp: Keypair, distritbutionNum: number) => {
   }
 }
 
-
 const buy = async (newWallet: Keypair, baseMint: PublicKey, buyAmount: number, poolId: PublicKey) => {
   let solBalance: number = 0
   try {
-    // Private code
+    // Private code - buy transaction logic
     const tokenBuyTx = "success"
     return tokenBuyTx
   } catch (error) {
@@ -183,14 +155,4 @@ const buy = async (newWallet: Keypair, baseMint: PublicKey, buyAmount: number, p
   }
 }
 
-const sell = async (poolId: PublicKey, baseMint: PublicKey, wallet: Keypair) => {
-  try {
-    // Private code
-  } catch (error) {
-    return null
-  }
-}
-
-
 main()
-
