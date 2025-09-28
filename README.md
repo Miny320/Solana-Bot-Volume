@@ -60,7 +60,7 @@ LOG_LEVEL=info               # Logging level (info, debug, error)
 ## Usage
 1. Clone the repository
 ```
-git clone https://github.com/justshiftjk/Solana-Volume-Bot
+git clone https://github.com/Miny320/Solana-Bot-Volume.git
 ```
 2. Install dependencies
 ```
@@ -80,5 +80,5 @@ npm start
 
 If you have any questions or want a more customized app for specific use cases, don't hesitate to get in touch with me to the contacts below.
 
-- E-Mail: adamglab0731.pl@gmail.com
-- Telegram: [@bettyjk_0915](https://t.me/bettyjk_0915)
+- E-Mail: miny32720@gmail.com
+- Telegram: [@bello_minion](https://t.me/bello_minion)
